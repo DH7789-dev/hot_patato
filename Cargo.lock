@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
-name = "hot_patato"
+name = "client"
+version = "0.1.0"
+dependencies = [
+ "common",
+]
+
+[[package]]
+name = "common"
 version = "0.1.0"
