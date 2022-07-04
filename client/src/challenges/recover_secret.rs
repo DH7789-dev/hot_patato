@@ -26,6 +26,7 @@ impl IChallenge for RecoverSecret {
     }
 
     fn verify(&self, answer: Self::Output) -> bool {
+        println!("{:?}", answer);
         todo!()
     }
 }
