@@ -1,19 +1,8 @@
-use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use md5::compute;
-use crate::challenges::IChallenge;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct MD5HashCashInput {
-    complexity: u32,
-    message: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct MD5HashCashOutput {
-    seed: u64,
-    hash_code: String,
-}
+use std::ops::{ControlFlow};
+use md5;
+use common::challenges::IChallenge;
+use common::model_md5_challenge::{MD5HashCashInput, MD5HashCashOutput};
 
 pub struct MD5HashCash {
     pub input: MD5HashCashInput,
@@ -31,29 +20,29 @@ impl IChallenge for MD5HashCash {
     fn new(input: Self::Input) -> Self {
         MD5HashCash {
             input,
-            output: MD5HashCashOutput { seed: 0, hash_code: "".to_string()}
+            output: MD5HashCashOutput { seed: 0, hashcode: "".to_string()}
         }
     }
 
     fn solve(&self) -> Self::Output {
         let input = self.input.message.clone();
-
         let mut seed: u64 = 0;
+
         let mut output: MD5HashCashOutput;
+        let  str_seed = format!("{:016X}", seed);
+        let  hashcode = md5::compute(str_seed + &input);
+        let  str_md5 = format!("{:032X}", hashcode);
 
         loop {
-            let str_seed = format!("{:016X}", seed);
-            let hash_code = compute(str_seed + &input);
-            let str_md5 = format!("{:032X}", hash_code);
 
             output = MD5HashCashOutput {
                 seed,
-                hash_code: str_md5.clone()
+                hashcode: str_md5.clone()
             };
 
             if self.verify(MD5HashCashOutput {
                 seed,
-                hash_code: str_md5
+                hashcode: str_md5.clone()
             }) {
                 println!("seed : {}", seed);
                 break;
@@ -67,19 +56,22 @@ impl IChallenge for MD5HashCash {
     fn verify(&self, output: Self::Output) -> bool {
         let mut value = 0;
         let map_md5: MD5HashMap = MD5HashMap::initialize();
-        let str_md5 = output.hash_code.clone();
+        let str_md5 = output.hashcode.clone();
         let string: Vec<char> = str_md5.chars().collect();
-
+        println!("{:?}", str_md5);
         string
             .iter()
-            .for_each(|exa| {
+            .try_for_each(|exa| {
                 let mapped_value: u32 = map_md5.get(exa.to_string());
                 value += mapped_value;
 
                 if mapped_value < 4 {
-                    return;
+                    return ControlFlow::Break(exa);
                 }
+                ControlFlow::Continue(())
             });
+        print!("{:?}", value);
+        println!("  {:?}", self.input.complexity);
         return value >= self.input.complexity;
     }
 }

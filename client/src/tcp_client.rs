@@ -32,7 +32,7 @@ impl TcpClient {
 
     pub fn waiting_response(&mut self) -> JsonMessage {
         let mut response_buffer = [0u8; 4];
-
+        println!("I m waiting");
         loop {
             let result: Result<(), _> = self.tcp_stream.read_exact(&mut response_buffer);
             if result.is_ok() {
