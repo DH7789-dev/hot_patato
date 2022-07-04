@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::ops::{ControlFlow};
 use md5;
 use common::challenges::IChallenge;
 use common::model_md5_challenge::{MD5HashCashInput, MD5HashCashOutput};
@@ -55,8 +53,8 @@ impl IChallenge for MD5HashCash {
 
     fn verify(&self, output: Self::Output) -> bool {
         let decimal = u128::from_str_radix(&*output.hashcode, 16).unwrap();
-        let binaire_size_all = format!("{:0128b}", decimal).len() as u32;
-        let binaire_size = format!("{:b}", decimal).len() as u32;
-        (binaire_size_all - binaire_size) >= self.input.complexity
+        let size_all = format!("{:0128b}", decimal).len() as u32;
+        let size = format!("{:b}", decimal).len() as u32;
+        (size_all - size) >= self.input.complexity
     }
 }
